@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hero Sections with Animated Strip (GSAP)</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  .hero-section {
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section:nth-child(1) {
+    background-color: #f0f8ff;
+  }
+
+  .hero-section:nth-child(2) {
+    background-color: #f5f5f5;
+  }
+
+  .hero-section:nth-child(3) {
+    background-color: #e0ffff;
+  }
+  
+  .hero-section:nth-child(4) {
+    background-color: #f0ffff;
+  }
+
+  .strip {
+    width: 30px;
+    background-color: #ffa07a;
+    position: absolute;
+    overflow: hidden;
+  }
+
+  .strip-1 {
+    height: 30px;
+    width: 50%;
+    right: 50%;
+    bottom: calc(40vh - 15px);
+  }
+
+  .strip-2 {
+    height: 30px;
+    width: 50%;
+    right: 0;
+    bottom: calc(40vh - 15px);
+  }
+
+  .strip-3 {
+    width: 30px;
+    height: 80vh;
+    left: 0;
+    top: 0;
+  }
+
+  .strip-4 {
+    height: 30px;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+  }
+
+  .strip-5 {
+    height: 40vh;
+    right: 50%;
+    bottom: 0;
+    transform: translateX(50%);
+  }
+  
+  .strip-7 {
+    height: 30px;
+    width: 50%;
+    right: 0;
+    top: 20px;
+  }
+
+  .light-slab {
+    position: absolute;
+    background: white;
+    box-shadow: 0 0 10px white;
+  }
+
+  .strip-1 .light-slab, .strip-2 .light-slab, .strip-4 .light-slab, .strip-7 .light-slab {
+    width: 30px;
+    height: 30px;
+    left: -30px;
+  }
+
+  .strip-3 .light-slab, .strip-5 .light-slab {
+    width: 30px;
+    height: 30px;
+    top: -30px;
+  }
+  
+  .hero-section:nth-child(4) h1 {
+    position: relative;
+  }
+  
+  .hero-section:nth-child(4) h1::after {
+    content: "GEDY";
+    position: absolute;
+    top: 20px;
+    right: 0;
+    font-size: 2em;
+    color: black;
+  }
+  
+  .hero-section:nth-child(4) h1::after span {
+    display: inline-block; /* Make each letter animatable */
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+<div class="hero-section">
+  <div class="strip strip-1"><div class="light-slab"></div></div>
+  <div class="strip strip-2"><div class="light-slab"></div></div>
+  <h1>Hero Section 1</h1>
+  <p>Content for the first hero section.</p>
+</div>
+
+<div class="hero-section">
+  <div class="strip strip-3"><div class="light-slab"></div></div>
+  <h1>Hero Section 2</h1>
+  <p>Content for the second hero section.</p>
+</div>
+
+<div class="hero-section">
+  <div class="strip strip-7"><div class="light-slab"></div></div>
+  <h1>Hero Section 4</h1>
+  <p>Content for the fourth hero section.</p>
+</div>
+
+<div class="hero-section">
+  <div class="strip strip-4"><div class="light-slab"></div></div>
+  <div class="strip strip-5"><div class="light-slab"></div></div>
+  <h1>Hero Section 3</h1>
+  <p>Content for the third hero section.</p>
+</div>
+
+
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.utils.toArray(".strip").forEach(strip => {
+    const lightSlab = strip.querySelector(".light-slab");
+
+    let animation;
+    if (strip.classList.contains("strip-3") || strip.classList.contains("strip-5")) {
+      animation = gsap.to(lightSlab, {
+        top: "100%",
+        duration: 2,
+        ease: "linear",
+        paused: true,
+      });
+    } else {
+      animation = gsap.to(lightSlab, {
+        left: "100%",
+        duration: 2,
+        ease: "linear",
+        paused: true,
+      });
+    }
+
+    ScrollTrigger.create({
+      trigger: strip.parentElement,
+      start: "top 80%",
+      onEnter: () => {
+        animation.play();
+        if (strip.classList.contains("strip-7")) {
+          gsap.to(".hero-section:nth-child(4) h1::after span:nth-child(4)", {
+            y: -10,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut",
+          });
+        }
+      },
+      onLeaveBack: () => animation.restart().pause(),
+      onLeave: () => animation.pause(),
+      onEnterBack: () => animation.play(),
+      markers: false,
+    });
+  });
+
+  // Wrap each letter in a span for animation
+  const gedy = document.querySelector(".hero-section:nth-child(4) h1::after");
+  if (gedy) {
+    gedy.innerHTML = gedy.textContent.split("").map(char => `<span>${char}</span>`).join("");
+  }
+</script>
+
+</body>
+</html>

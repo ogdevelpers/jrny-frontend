@@ -1,0 +1,111 @@
+.expanding-video-wrapper { 
+  background-color: #000000;
+  width:100%; 
+  display:flex;
+  justify-content: center;
+  align-items:flex-start;
+}
+
+/* Container for the expanding video animation */
+.expanding-video-container {
+  position: relative; 
+  display: flex;  
+  align-items: flex-start;
+  justify-content: center;
+  width:100%;
+}
+
+.expanding-video {
+  width: 70vw;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  aspect-ratio: 16/9; 
+  z-index: 10;  
+}
+
+/* Left cards container */
+.left-cards {
+  position: absolute;
+  border:2px solid blue;
+  left: -17%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+/* Right cards container */
+.right-cards {
+  position: absolute;
+  right: -22%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+
+/* Card styling */
+.card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  width: 20rem;
+  height: auto; 
+}
+
+.card-image {
+  width: 100%;
+  height: 5.5rem;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 0.5rem;
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+ 
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .expanding-video-wrapper {
+    min-height: 120vh;
+  }
+
+  .expanding-video-container {
+    height: 120vh;
+  }
+
+  .left-cards {
+    left: calc(50% - 200px);
+  }
+  
+  .right-cards {
+    right: calc(50% - 200px);
+  }
+  
+  .card {
+    width: 5rem;
+    height: 6.5rem;
+  }
+  
+  .card-image {
+    height: 4.5rem;
+  }
+  
+  .expanding-video {
+    width: 60vw;
+  }
+}
