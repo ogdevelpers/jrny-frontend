@@ -934,8 +934,7 @@ line-height: 20px;
   }
 
   .landing-portfolio{
-
-    height:1400px;
+    height:1000px;
   }
 
   .testimonial-bottom{
@@ -943,18 +942,18 @@ line-height: 20px;
   }
 
   .carousol-container{
-    height:500px;
+    height:800px;
+    justify-content: space-evenly;
+    gap:2rem;
+    border:2px solid red;
   }
 
   .portfolio-tiles-landing {
     padding-left: 0;
     margin:0 auto;
-    height:90%;
-    max-height:95%; 
+    height:800px;
   }
-
  
-
 
   .right-choice-container {
     gap: 1rem;
@@ -1019,7 +1018,34 @@ line-height: 20px;
   }
 
   .landing-svg-container {
-    height: 3800px;
+    height: 3800px;max-height:3800px;
+  }
+
+  /* Inside svg-container */
+  .about-us-landing{
+    height:600px;
+  }
+
+  .card-container{
+    height:1400px;
+  }
+  
+  .journeys-div{
+    height:1800px;
+  }
+
+  /* Inside journeys-div */
+
+  .landing-portfolio{
+    height:1000px;
+  }
+
+  .testimonial-bottom{
+    height:200px;
+  }
+
+  .carousol-container{
+    height: 600px;
   }
 
   .landing-title {
