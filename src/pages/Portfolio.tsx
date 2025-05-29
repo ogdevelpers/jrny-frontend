@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Contact from "../components/Contact/Contact";
-import PartnerShow from "../components/PartnerShow/PartnerShow";
+// import PartnerShow from "../components/PartnerShow/PartnerShow";
 import "./../css/portfolio.css";
 import FooterLine from "../components/shared/footer/FooterLine";
 import Footer from "../components/shared/footer/Footer";
