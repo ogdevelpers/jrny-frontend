@@ -50,8 +50,7 @@ const PathWithSlab: React.FC = () => {
         trigger: svg,
         start: "top bottom",
         end: "bottom 40%", 
-        scrub: true,
-        markers: true, // Remove in production
+        scrub: true, 
       }
     });
 

@@ -1,8 +1,7 @@
 import Carasoul from "../components/Carasoul/Carasoul";
 import "./../css/landingpage.css";
 import ShowReel from "../components/ShowReel/ShowReel";
-import AnimatedPathWithSlab from "../components/LineSvg/LineSvg";
-import HorizontalScrollSlider from "../components/HorizontalScroll/HorizontalScroll";
+import AnimatedPathWithSlab from "../components/LineSvg/LineSvg"; 
 import { PortfolioMiddleList } from "./Portfolio";
 import PartnerSlider from "../components/PartnerSlider/PartnerSlider";
 import useIsMobile from "../hooks/useIsMobile";
@@ -24,26 +23,46 @@ export default function LandingPage() {
               <span className="landing-page-matter-text">MATTER</span>
             </h1>
           </div>
-          <section className="landing-expanding-video"> 
-            <ExpandingVideo/>
-          </section>
 
+          {
+            !isMobile ? 
+            (<section className="landing-expanding-video"> 
+            <ExpandingVideo/>
+          </section>) : 
+          (
+            <section className="landing-video-mobile">
+              <video
+                className="landing-video-mobile-tag"
+                autoPlay
+                loop
+                muted
+                playsInline
+              >
+                <source src="https://cdn-front.freepik.com/revamp/temp/hero/1905-AnonymousHome1920x1080.webm" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </section>
+          )
+      
+         }
 
         </div>
 
 
-        <div className="landing-svg-container">
-          <section className="svg-content">
+        <div className="landing-svg-container"> 
             {isMobile ? (
+              <section className="svg-content-mobile"> 
               <div className="content-svg-mobile">
                 <LineSvgMobile/>
               </div>
+               </section>
             ) : (
+              <section className="svg-content">
               <div className="content-svg">
                 <AnimatedPathWithSlab />
               </div>
-            )}
-          </section>
+              </section>
+            )} 
 
           <div className="about-us-landing">
             <div className="about-us-section  ">
@@ -149,9 +168,7 @@ export default function LandingPage() {
                   transforms ideas into unforgettable moments that engage and
                   inspire audiences. Explore our portfolio to see the journeys
                   we’ve crafted.{" "}
-                </p>
-                <div className="line-outlier"></div>
-                <div className="line-outlier-mobile"></div>
+                </p> 
               </div>
 
               <div className="portfolio-tiles-landing">
