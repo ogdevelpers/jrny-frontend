@@ -104,8 +104,8 @@
 
 .svg-content {
   position: absolute;
-  left: 0; /* <- fixed */
-  top: 520px;
+  left: 0; /* <- fixed */ 
+  top:-9%;
   height: 100%;
   width: 100%; /* <- fixed */
   max-width: 100%;
@@ -953,7 +953,6 @@ line-height: 20px;
     margin:0 auto;
     height:800px;
   }
- 
 
   .right-choice-container {
     gap: 1rem;

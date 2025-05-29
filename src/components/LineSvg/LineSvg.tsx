@@ -3,281 +3,173 @@ import { gsap } from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger'; 
 import { useGSAP } from '@gsap/react';
-import { pathEase } from './pathease';
 
 gsap.registerPlugin(MotionPathPlugin, ScrollTrigger);
 
 const PathWithSlab: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const coverPathRef = useRef<SVGPathElement>(null);
-  const originalPathRef = useRef<SVGPathElement>(null);
-  const glowPathRef = useRef<SVGPathElement>(null);
-
-  const [rightEdge, setRightEdge] = React.useState((window?.innerWidth as number) );
+  const pathRef = useRef<SVGPathElement>(null);
+  const movingSvgRef = useRef<SVGSVGElement>(null);
+  const [rightEdge, setRightEdge] = React.useState(window.innerWidth);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth !== rightEdge) { 
-        setRightEdge(window.innerWidth);
-      }
+      setRightEdge(window.innerWidth);
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Initial call to set the right edge
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  },[]);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  useGSAP(() => {
-    if (!svgRef.current || !coverPathRef.current || !originalPathRef.current || !glowPathRef.current) return;
+useGSAP(() => {
+  if (!pathRef.current || !movingSvgRef.current || !svgRef.current) return;
 
-    const path = originalPathRef.current;
-    const pathLength = path.getTotalLength();
-    const coverWidth = 7;
-    const coverLength = 120;
-    const glowWidthMultiplier = 7;
+  const path = pathRef.current;
+  const moving = movingSvgRef.current;
+  const svg = svgRef.current;
 
-    const createEllipticalShadowFilter = (id: string, blur: number) => {
-      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-      filter.id = id;
-      filter.setAttribute('x', '-50%');
-      filter.setAttribute('y', '-50%');
-      filter.setAttribute('width', '200%');
-      filter.setAttribute('height', '200%');
+  // Get SVG dimensions and viewport info
+  const svgRect = svg.getBoundingClientRect();
+  const viewportHeight = window.innerHeight;
+  
+  // Calculate path bounds to understand the full travel distance
+  const pathBBox = path.getBBox();
+  const pathWidth = pathBBox.width;
+  const pathHeight = pathBBox.height;
+  
+  // Calculate the maximum dimension to ensure full visibility
+  const maxDimension = Math.max(pathWidth, pathHeight);
+  
+  // Dynamic scroll distance calculation
+  // Base distance on SVG height + viewport height + some buffer for the path travel
+  const baseScrollDistance = svgRect.height + viewportHeight;
+  const pathTravelBuffer = maxDimension * 0.5; // Add 50% of max path dimension as buffer
+  const totalScrollDistance = baseScrollDistance + pathTravelBuffer;
 
-      const feOffset = document.createElementNS('http://www.w3.org/2000/svg', 'feOffset');
-      feOffset.setAttribute('dx', '0');
-      feOffset.setAttribute('dy', '0');
-      feOffset.setAttribute('result', 'offset');
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: svg,
+      start: "top bottom", // Start when SVG enters viewport
+      end: () => `bottom 40%`, 
+      scrub: true, // Smooth scrubbing
+      markers: true, // Remove in production
 
-      const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-      feGaussianBlur.setAttribute('stdDeviation', String(blur));
-      feGaussianBlur.setAttribute('result', 'blur');
+    }
+  });
 
-      const feComposite = document.createElementNS('http://www.w3.org/2000/svg', 'feComposite');
-      feComposite.setAttribute('in', 'blur');
-      feComposite.setAttribute('in2', 'SourceAlpha');
-      feComposite.setAttribute('operator', 'in');
-      feComposite.setAttribute('result', 'shadow');
+  tl.fromTo(moving, 
+    { 
+      x: -100, 
+      y: -100,
+      scale: 1,
+      opacity: 1
+    }, 
+    {
+      ease: "none",
+      motionPath: {
+        path: path,
+        align: path,
+        autoRotate: true,
+        alignOrigin: [0.5, 0.5]
+      },
+      // Optional: Add some visual enhancements
+      scale: 1.1, // Slight scale change during animation
+      duration: 1 // This gets overridden by scrub, but good for reference
+    }
+  );
 
-      const feFlood = document.createElementNS('http://www.w3.org/2000/svg', 'feFlood');
-      feFlood.setAttribute('flood-color', '#FF5408');
-      feFlood.setAttribute('result', 'color');
+  // Handle window resize to recalculate distances
+  const handleResize = () => {
+    ScrollTrigger.refresh();
+  };
 
-      const feComposite2 = document.createElementNS('http://www.w3.org/2000/svg', 'feComposite');
-      feComposite2.setAttribute('in', 'color');
-      feComposite2.setAttribute('in2', 'shadow');
-      feComposite2.setAttribute('operator', 'in');
+  window.addEventListener('resize', handleResize);
 
-      const feComposite3 = document.createElementNS('http://www.w3.org/2000/svg', 'feComposite');
-      feComposite3.setAttribute('in', 'SourceGraphic');
-      feComposite3.setAttribute('operator', 'over');
-
-      filter.appendChild(feOffset);
-      filter.appendChild(feGaussianBlur);
-      filter.appendChild(feComposite);
-      filter.appendChild(feFlood);
-      filter.appendChild(feComposite2);
-      filter.appendChild(feComposite3);
-
-      return filter;
-    };
-
-    const blurFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    blurFilter.id = 'blur-filter';
-    blurFilter.setAttribute('x', '-50%');
-    blurFilter.setAttribute('y', '-50%');
-    blurFilter.setAttribute('width', '200%');
-    blurFilter.setAttribute('height', '200%');
-
-    const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
-    feGaussianBlur.setAttribute('stdDeviation', '26.9');
-    blurFilter.appendChild(feGaussianBlur);
-
-    const createRadialGradient = (id: string, colors: { offset: string; color: string }[], transform: string) => {
-      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
-      gradient.id = id;
-      gradient.setAttribute('cx', '50%');
-      gradient.setAttribute('cy', '50%');
-      gradient.setAttribute('r', '50%');
-      gradient.setAttribute('fx', '50%');
-      gradient.setAttribute('fy', '50%');
-      gradient.setAttribute('gradientTransform', transform);
-
-      colors.forEach(stop => {
-        const stopElement = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stopElement.setAttribute('offset', stop.offset);
-        stopElement.setAttribute('stop-color', stop.color);
-        gradient.appendChild(stopElement);
-      });
-
-      return gradient;
-    };
-
-    const primaryGradient = createRadialGradient(
-      'primary-gradient',
-      [
-        { offset: '0%', color: '#FFCB64' },
-        { offset: '70%', color: '#FFCB64' },
-        { offset: '90%', color: '#FF7A00' },
-        { offset: '100%', color: '#FF4900' }
-      ],
-      'scale(1, 0.25)'
-    );
-
-    const glowGradient = createRadialGradient(
-      'glow-gradient',
-      [
-        { offset: '0%', color: '#FFCB64' },
-        { offset: '60%', color: '#FFCB64' },
-        { offset: '85%', color: '#FF7A00' },
-        { offset: '100%', color: '#FF5408' }
-      ],
-      'scale(1, 0.2)'
-    );
-
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    [
-      { id: 'shadow-4px', blur: 4.52 },
-      { id: 'shadow-9px', blur: 9.04 },
-      { id: 'shadow-32px', blur: 31.65 },
-      { id: 'shadow-63px', blur: 63.29 },
-      { id: 'shadow-108px', blur: 108.5 },
-      { id: 'shadow-190px', blur: 189.88 }
-    ].forEach(filter => defs.appendChild(createEllipticalShadowFilter(filter.id, filter.blur)));
-
-    defs.appendChild(blurFilter);
-    defs.appendChild(primaryGradient);
-    defs.appendChild(glowGradient);
-    svgRef.current.appendChild(defs);
-
-    const getNormalAtLength = (path: SVGPathElement, length: number) => {
-      const EPSILON = 1.5;
-      const point1 = path.getPointAtLength(Math.max(0, length - EPSILON));
-      const point2 = path.getPointAtLength(Math.min(pathLength, length + EPSILON));
-
-      const dx = point2.x - point1.x;
-      const dy = point2.y - point1.y;
-      const magnitude = Math.sqrt(dx * dx + dy * dy);
-
-      return {
-        x: -dy / magnitude,
-        y: dx / magnitude
-      };
-    };
-
-    const generatePathData = (points: { x: number; y: number }[]) =>
-      points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ',' + p.y).join(' ') + ' Z';
-
-    const updatePaths = (progress: number) => {
-      const centerLength = progress * pathLength;
-      let startLength = Math.max(0, centerLength - coverLength / 2);
-      let endLength = Math.min(pathLength, centerLength + coverLength / 2);
-
-      if (endLength - startLength < coverLength) {
-        if (centerLength < pathLength / 2) {
-          endLength = startLength + coverLength;
-        } else {
-          startLength = endLength - coverLength;
-        }
-      }
-
-      const segments = 40;
-      const coverPoints = [];
-      const glowPoints = [];
-      const baseGlowWidth = coverWidth * glowWidthMultiplier;
-
-      for (let i = 0; i <= segments; i++) {
-        const ratio = i / segments;
-        const length = startLength + ratio * coverLength;
-        const point = path.getPointAtLength(length);
-        const normal = getNormalAtLength(path, length);
-        const ellipticalFactor = Math.sin(Math.PI * ratio);
-        const currentWidth = coverWidth * (0.6 + 0.4 * ellipticalFactor);
-        const glowWidth = baseGlowWidth * (0.2 + 0.8 * ellipticalFactor);
-
-        coverPoints.push({
-          x: point.x + normal.x * currentWidth / 2,
-          y: point.y + normal.y * currentWidth / 2
-        });
-        glowPoints.push({
-          x: point.x + normal.x * glowWidth / 2,
-          y: point.y + normal.y * glowWidth / 2
-        });
-      }
-
-      for (let i = segments; i >= 0; i--) {
-        const ratio = i / segments;
-        const length = startLength + ratio * coverLength;
-        const point = path.getPointAtLength(length);
-        const normal = getNormalAtLength(path, length);
-        const ellipticalFactor = Math.sin(Math.PI * ratio);
-        const currentWidth = coverWidth * (0.6 + 0.4 * ellipticalFactor);
-        const glowWidth = baseGlowWidth * (0.2 + 0.8 * ellipticalFactor);
-
-        coverPoints.push({
-          x: point.x - normal.x * currentWidth / 2,
-          y: point.y - normal.y * currentWidth / 2
-        });
-        glowPoints.push({
-          x: point.x - normal.x * glowWidth / 2,
-          y: point.y - normal.y * glowWidth / 2
-        });
-      }
-
-      coverPathRef.current?.setAttribute('d', generatePathData(coverPoints));
-      glowPathRef.current?.setAttribute('d', generatePathData(glowPoints));
-    };
-
-
-    gsap.to(coverPathRef.current, {
-      scrollTrigger: {
-        trigger: ".pinMe",
-        start: "top top",
-        end: "+=4930",  
-        onUpdate: (self) => updatePaths(self.progress ), 
-      }, 
-    });
-
-    return () => {
-      gsap.killTweensOf(coverPathRef.current);
-      ScrollTrigger.killAll();
-    };
-  }, []); 
+  return () => {
+    ScrollTrigger.getAll().forEach(st => st.kill());
+    window.removeEventListener('resize', handleResize);
+  };
+}, { scope: svgRef });
 
   return (
-    <svg
-      ref={svgRef}
-      viewBox={`0 0 ${rightEdge} 4000`}
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ width: '100%', height: 'auto', pointerEvents: 'none' }}
-    >
-      {/* Definitions are still generated programmatically in useGSAP */}
-      <path
-        ref={originalPathRef}
-        id="mainPath"
-        d={`M${rightEdge},40 L${rightEdge},340 L2,420 L2,1900 L${rightEdge},2000 L${rightEdge},3500 L2,3580 L2,3890`}
-        fill="none"
-        stroke="#FF5B00"
-        strokeWidth="4"
-      />
-      <g filter="url(#blur-filter)">
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-190px)" opacity="0.6" />
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-108px)" opacity="0.7" />
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-63px)" opacity="0.8" />
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-32px)" opacity="0.9" />
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-9px)" opacity="0.95" />
-        <path ref={glowPathRef} fill="url(#glow-gradient)" filter="url(#shadow-4px)" opacity="1" />
-      </g>
-      <path
-        ref={coverPathRef}
-        fill="url(#primary-gradient)"
-        stroke="#FF5B00"
-        strokeWidth="1.1"
-        strokeOpacity="0.8"
-      />
-    </svg>
+    <div style={{ position: 'relative' }}>
+      {/* Main path SVG */}
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${rightEdge} 4000`}
+        style={{ width: '100%', height: '4000px', position: 'absolute' }}
+      >
+        <path
+          ref={pathRef}
+          d={`M${rightEdge},40 L${rightEdge},340 L2,420 L2,1800 L${rightEdge},1900 L${rightEdge},3450 L2,3540 L2,3890`}
+          fill="none"
+          stroke="#FF5B00"
+          strokeWidth="4"
+        />
+      </svg>
+
+      {/* Moving SVG that follows the path */}
+      <svg
+        ref={movingSvgRef}
+        width="533"
+        height="408"
+        viewBox="0 0 533 408"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '200px',
+          height: 'auto',
+          pointerEvents: 'none',
+          willChange: 'transform'
+        }}
+      >
+        <g opacity="0.6" filter="url(#filter0_ddddddf_1156_2104)">
+          <path d="M190 204C190 196.268 196.268 190 204 190H328.276C336.008 190 342.276 196.268 342.276 204V204C342.276 211.732 336.008 218 328.276 218H204C196.268 218 190 211.732 190 204V204Z" fill="url(#paint0_radial_1156_2104)"/>
+        </g>
+        <defs>
+          <filter id="filter0_ddddddf_1156_2104" x="0.117996" y="0.117996" width="532.04" height="407.764" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+            <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="2.2605"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1156_2104"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="4.521"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="effect1_dropShadow_1156_2104" result="effect2_dropShadow_1156_2104"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="15.8235"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="effect2_dropShadow_1156_2104" result="effect3_dropShadow_1156_2104"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="31.647"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="effect3_dropShadow_1156_2104" result="effect4_dropShadow_1156_2104"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="54.252"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="effect4_dropShadow_1156_2104" result="effect5_dropShadow_1156_2104"/>
+            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+            <feOffset/>
+            <feGaussianBlur stdDeviation="94.941"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.329412 0 0 0 0 0.0313726 0 0 0 1 0"/>
+            <feBlend mode="normal" in2="effect5_dropShadow_1156_2104" result="effect6_dropShadow_1156_2104"/>
+            <feBlend mode="normal" in="SourceGraphic" in2="effect6_dropShadow_1156_2104" result="shape"/>
+            <feGaussianBlur stdDeviation="13.45" result="effect7_foregroundBlur_1156_2104"/>
+          </filter>
+          <radialGradient id="paint0_radial_1156_2104" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(266.138 256) scale(76.1381 14)">
+            <stop stopColor="#FFCB64"/>
+            <stop offset="1" stopColor="#FF4900"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
   );
 };
 
