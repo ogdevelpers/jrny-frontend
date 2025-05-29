@@ -31,7 +31,16 @@ export default function LandingPage() {
           </section>) : 
           (
             <section className="landing-video-mobile">
-              <HorizontalScrollSlider />
+              <video
+                className="landing-video-mobile-tag"
+                autoPlay
+                loop
+                muted
+                playsInline
+              >
+                <source src="https://cdn-front.freepik.com/revamp/temp/hero/1905-AnonymousHome1920x1080.webm" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </section>
           )
       
@@ -40,18 +49,20 @@ export default function LandingPage() {
         </div>
 
 
-        <div className="landing-svg-container">
-          <section className="svg-content">
+        <div className="landing-svg-container"> 
             {isMobile ? (
+              <section className="svg-content-mobile"> 
               <div className="content-svg-mobile">
                 <LineSvgMobile/>
               </div>
+               </section>
             ) : (
+              <section className="svg-content">
               <div className="content-svg">
                 <AnimatedPathWithSlab />
               </div>
-            )}
-          </section>
+              </section>
+            )} 
 
           <div className="about-us-landing">
             <div className="about-us-section  ">
@@ -157,9 +168,7 @@ export default function LandingPage() {
                   transforms ideas into unforgettable moments that engage and
                   inspire audiences. Explore our portfolio to see the journeys
                   we’ve crafted.{" "}
-                </p>
-                <div className="line-outlier"></div>
-                <div className="line-outlier-mobile"></div>
+                </p> 
               </div>
 
               <div className="portfolio-tiles-landing">
