@@ -9,7 +9,7 @@ import { Outlet } from "react-router";
 // import { useRef } from "react";
 // import gsap from "gsap";
 
-gsap.registerPlugin(ScrollSmoother);
+// gsap.registerPlugin(ScrollSmoother);
 
 export default function App() { 
     
