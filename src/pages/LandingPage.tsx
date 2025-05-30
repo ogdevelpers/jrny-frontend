@@ -8,16 +8,56 @@ import useIsMobile from "../hooks/useIsMobile";
 import LineSvgMobile from "../components/LineSvg/LineSvgMobile";
 import Footer from "../components/shared/footer/Footer";
 import ExpandingVideo from "../components/ExpandingVideo/ExpandingVideo";  
+import { useEffect, useState } from "react";
+import { fetchCollection } from "../api/strapi";
+import { extractContentByKey } from "../utils/common.util";
 
 
 export default function LandingPage() {
-  const isMobile = useIsMobile(1010); 
+  const isMobile = useIsMobile(1010);
+  const [content, setContent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [portfolio, setPortfolio] = useState([]);
+  const [brandLogos, setBrandLogos] = useState([]);
+  const [testimonial, setTestimonial] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetchCollection('contents'),
+      fetchCollection('portfolios'),
+      fetchCollection('brand-logos'),
+      fetchCollection('testimonials'),
+    ])
+      .then(([contentData, portfolioData, brandLogoData, testimonialData]) => {
+        setContent(contentData.data);
+        setPortfolio(portfolioData.data);
+        setBrandLogos(brandLogoData.data);
+        setTestimonial(testimonialData.data);
+      })
+      .catch(err => {
+        console.error('Error fetching data:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  
+
+  const aboutTitle = extractContentByKey(content, 'about-us'),
+    usText = extractContentByKey(content, 'us'),
+    provideText = extractContentByKey(content, 'provide'),
+    jrnyText = extractContentByKey(content, 'jrny'),
+    serviceText = extractContentByKey(content, 'services-we-provide'),
+    ourText = extractContentByKey(content, 'our-portfolio'),
+    portfolioText = extractContentByKey(content, 'portfolio');
+
+  if (loading) return <p>Loading...</p>;
+
   return (
     <>
       <div className="landing-container">
         <div className="hero-container">
           <div className="landing-text-container">
-            <span className="part-of-span">Been a part of 20+ journeys</span>
+            {/* <span className="part-of-span">Been a part of 20+ journeys</span> */}
             <h1 className="landing-title">
               Making Moments <br />
               <span className="landing-page-matter-text">MATTER</span>
@@ -68,12 +108,10 @@ export default function LandingPage() {
             <div className="about-us-section  ">
               <div className="about-us-landing-text">
                 <h1 className="about-us-landing-title">
-                  About <span className="jrny-span">US</span>
+                  {aboutTitle?.contentTitle} <span className="jrny-span">{usText?.contentTitle}</span>
                 </h1>
                 <p className="about-us-landing-paragraph">
-                  JRNY Experiential partners with you to create immersive events
-                  that engage, inspire, and connect. Together, we craft
-                  unforgettable experiences that leave a lasting impact.{" "}
+                  {aboutTitle?.text}
                 </p>
               </div>
               <div className="showreel-container">
@@ -86,14 +124,10 @@ export default function LandingPage() {
             <section className="card-para-div">
               <div className="services-landing-container  ">
                 <h1 className="services-landing-title">
-                  Services we <span className="jrny-span">Provide</span>
+                  {serviceText?.contentTitle} <span className="jrny-span">{provideText?.contentTitle}</span>
                 </h1>
                 <p className="services-landing-paragraph">
-                  We create immersive and impactful digital experiences, from
-                  virtual conferences to interactive brand activations. Our work
-                  transforms ideas into unforgettable moments that engage and
-                  inspire audiences. Explore our portfolio to see the journeys
-                  we’ve crafted.{" "}
+                 {serviceText?.text}
                 </p>
               </div>
 
@@ -148,7 +182,7 @@ export default function LandingPage() {
 
             <div className="partners-slideshow">
               <span className="partnered">Partnered with:</span>
-              <PartnerSlider />
+              <PartnerSlider brandLogos={brandLogos}/>
 
               <div className="landing-line">
                 <img src="landing_line.png" alt="" />
@@ -160,19 +194,15 @@ export default function LandingPage() {
             <section className="landing-portfolio">
               <div className="landing-portfolio-title-box">
                 <h1 className="landing-portfolio-title">
-                  Our <span className="jrny-span">Portfolio</span>
+                  {ourText?.contentTitle} <span className="jrny-span">{portfolioText?.contentTitle}</span>
                 </h1>
                 <p className="landing-portfolio-paragraph">
-                  We create immersive and impactful digital experiences, from
-                  virtual conferences to interactive brand activations. Our work
-                  transforms ideas into unforgettable moments that engage and
-                  inspire audiences. Explore our portfolio to see the journeys
-                  we’ve crafted.{" "}
+                  {ourText?.text}
                 </p> 
               </div>
 
               <div className="portfolio-tiles-landing">
-                <PortfolioMiddleList />
+                <PortfolioMiddleList portfolio={portfolio}/>
                 <div className="see-more-container">
 
                 <a href="/portfolio"><button className="see-more">See More</button></a>
@@ -198,14 +228,14 @@ export default function LandingPage() {
               <div className="carousol">
                 <div className="profile-section"></div>
                 <div className="carousol-card-section"></div>
-                <Carasoul />
+                <Carasoul testimonial={testimonial}/>
               </div>
             </div>
           </div>
         </div>
 
         <div className="penultimate-container">
-          <RightChoice />
+          <RightChoice content={content}/>
         </div>
           <div className="landing-footer">
 
@@ -216,7 +246,7 @@ export default function LandingPage() {
   );
 }
 
-export const RightChoice = () => {
+export const RightChoice = ({content}: any) => {
   return (
     <>
       <div className="right-choice-container">
@@ -230,38 +260,27 @@ export const RightChoice = () => {
 
         <div className="features">
           <div className="feature-container addPlus">
-            <span className="feature-title">INNOVATION</span>
+            <span className="feature-title">{extractContentByKey(content, 'innovation')?.contentTitle}</span>
             <div className="feature-caption">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              {extractContentByKey(content, 'innovation')?.text}
             </div>
           </div>
           <div className="feature-container addPlus">
-            <span className="feature-title">CUSTOMIZATION</span>
+            <span className="feature-title">{extractContentByKey(content, 'customization')?.contentTitle}</span>
             <div className="feature-caption">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              {extractContentByKey(content, 'customization')?.text}
             </div>
           </div>
           <div className="feature-container addPlus">
-            <span className="feature-title">EXCELLENCE</span>
+            <span className="feature-title">{extractContentByKey(content, 'excellence')?.contentTitle}</span>
             <div className="feature-caption">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat
+              {extractContentByKey(content, 'excellence')?.text}
             </div>
           </div>
           <div className="feature-container addPlus">
-            <span className="feature-title">GLOBAL REACH </span>
+            <span className="feature-title">{extractContentByKey(content, 'global-reach')?.contentTitle}</span>
             <div className="feature-caption">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+              {extractContentByKey(content, 'global-reach')?.text}
             </div>
           </div>
         </div>

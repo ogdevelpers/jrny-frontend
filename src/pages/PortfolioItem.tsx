@@ -4,9 +4,32 @@ import { useParams } from 'react-router';
 import {   PortfolioMiddleList } from './Portfolio';
 import Footer from '../components/shared/footer/Footer';
 import  ShareOn  from '../components/ShareOn/ShareOn';
+import { useEffect, useState } from 'react';
+import { fetchCollection } from '../api/strapi';
 
 export default function PortfolioItem() {
-  const { portfolioId } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [portfolio, setPortfolio] = useState([]);
+    const { portfolioId } = useParams();
+
+    useEffect(() => {
+        Promise.all([
+          fetchCollection('portfolios'),
+        ])
+          .then(([portfolioData]) => {
+            setPortfolio(portfolioData.data);
+          })
+          .catch(err => {
+            console.error('Error fetching data:', err);
+          })
+          .finally(() => setLoading(false));
+      }, []);
+
+      const projectData = portfolio?.find((item: any) => item.id === portfolioId);
+
+      console.log('portfolioId', projectData);
+
+      if (loading) return <p>Loading...</p>;
   
   return (
     <>
@@ -17,7 +40,7 @@ export default function PortfolioItem() {
 
         <div className="portfolio-item-middle-list">
             <span className="might-like">Project <span className="jrny-span"> you might Like!  </span></span>
-      <PortfolioMiddleList />
+        <PortfolioMiddleList />
         </div>
         <div className="portfolio-item-footer">
       <Footer/>

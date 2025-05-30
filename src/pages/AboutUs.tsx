@@ -5,38 +5,56 @@ import Footer from '../components/shared/footer/Footer';
 import useIsMobile from '../hooks/useIsMobile';
 import TagSlider from '../components/TagSlider/TagSlider';
 import Button from '../components/Button/Button';
+import { useEffect, useState } from 'react';
+import { fetchCollection } from '../api/strapi';
+import { extractContentByKey } from '../utils/common.util';
 
-const AboutUsMottoArray = [
+export default function AboutUs() {
+  const [loading, setLoading] = useState(true);
+    const [content, setContent] = useState([]);
+    const [tag, setTag] = useState([]);
+    const [team, setTeam] = useState([]);
+
+    useEffect(() => {
+        Promise.all([
+          fetchCollection('contents'),
+          fetchCollection('tags'),
+          fetchCollection('teams')
+        ])
+          .then(([contentData, tagData, teamData]) => {
+            setContent(contentData.data);
+            setTag(tagData.data);
+            setTeam(teamData.data);
+          })
+          .catch(err => {
+            console.error('Error fetching data:', err);
+          })
+          .finally(() => setLoading(false));
+      }, []);
+
+      const aboutText = extractContentByKey(content, 'about-us'),
+      usText = extractContentByKey(content, 'us');
+
+  const isMobile = useIsMobile(1000);
+
+
+  const AboutUsMottoArray = [
   {
-    title: "MISSION",
-    description: "We exist to transform ordinary journeys into extraordinary ones. Our goal is to help businesses create experiences that people don’t just go through but truly remember. From startups to established brands, we partner with companies to craft meaningful moments."
+    title: extractContentByKey(content, 'mission')?.contentTitle,
+    description: extractContentByKey(content, 'mission')?.text
   },
   {
-    title: "VISION",
-    description: "We strive to redefine digital events by turning ordinary interactions into extraordinary experiences. Through innovation and technology, we create immersive, engaging, and seamless events that connect people in meaningful ways."
+    title: extractContentByKey(content, 'vision')?.contentTitle,
+    description: extractContentByKey(content, 'vision')?.text
   },
   {
-    title: "IMPACT",
-    description: "From startups to global enterprises, we’ve empowered brands to host unforgettable digital events. By combining creativity, strategy, and cutting-edge solutions, we ensure every event leaves a lasting impression and drives real engagement."
+    title: extractContentByKey(content, 'impact')?.contentTitle,
+    description: extractContentByKey(content, 'impact')?.text
   }
 ]
 
-const AboutUsPerson = {
-  personPicture: "/about-person.png",
-  personName: "John Doe",
-  personDesignation: "Director, ABC",
-  personSocials: {
-    linkedIn: "http LinkedIn",
-    instagram: "http instagram",
-    facebook: "http Facebook"
-  }
-};
+if (loading) return <p>Loading...</p>;
 
-const AboutUsPersonArray = Array(12).fill(AboutUsPerson);
-
-
-export default function AboutUs() {
-  const isMobile = useIsMobile(1000);
   return (
     <div className="about-us-container">
       <div className="about-landing-container">
@@ -47,7 +65,7 @@ export default function AboutUs() {
           </div>}
         <div className="about-landing-content">
           <div className="about-landing-header">
-            About <span className='jrny-span'>US</span>
+            {aboutText?.contentTitle} <span className='jrny-span'>{usText?.contentTitle}</span>
           </div>
           {
             !isMobile && (
@@ -60,13 +78,13 @@ export default function AboutUs() {
             )
           }
           <div className="about-landing-description">
-            At JRNY, we believe every experience should be more than just a moment—it should be a memory that lasts. We are passionate about designing journeys that connect, inspire, and leave a lasting impact. Whether it's through seamless user experiences, immersive storytelling, or meaningful interactions, we make sure every step of the journey is unforgettable.
+            {aboutText?.text}
           </div>
         </div>
       </div>
 
       <div className="about-tag-container">
-        <TagSlider />
+        <TagSlider tag={tag}/>
       </div>
 
                 {isMobile && (
@@ -81,6 +99,7 @@ export default function AboutUs() {
           )}
 
 
+      
       <div className="about-main-container">
         <div className="about-motto">
           {
@@ -95,25 +114,25 @@ export default function AboutUs() {
 
         <div className="about-main-tag">
           <p className="about-main-description">
-            <span className="jrny-span">Our team </span>is made up of passionate creatives, strategists, and experience designers who are dedicated to making every journey unforgettable.
+            <span className="jrny-span">{extractContentByKey(content, 'our-team')?.contentTitle} </span>{extractContentByKey(content, 'our-team-description')?.contentTitle}
           </p>
         </div>
 
         <div className="about-people-tile-container">
-          {AboutUsPersonArray.map((person, index) => (
+          {team?.map((person: any, index) => (
             <div key={index} className="person-tile">
               <img
-                src={person.personPicture}
-                alt={person.personName}
+                src={person.userImage}
+                alt={person.name}
                 className="person-image"
               />
               <div className="person-info">
                 <div className="person-credentails">
-                  <div className="person-name">{person.personName}</div>
-                  <div className="person-designation">{person.personDesignation}</div>
+                  <div className="person-name">{person.name}</div>
+                  <div className="person-designation">{person.jobTitle}</div>
                 </div>
                 <div className="social-links-favicon">
-                  <a href={person.personSocials.linkedIn}><img src="/favicon/linkedin.svg" alt="" /></a>
+                  <a href={person?.personSocials?.linkedIn}><img src="/favicon/linkedin.svg" alt="" /></a>
                   {/* <a href={person.personSocials.instagram}><img src="/favicon/instagram.svg" alt="" /></a>
                 <a href={person.personSocials.facebook}><img src="/favicon/facebook.svg" alt="" /></a> */}
                 </div>

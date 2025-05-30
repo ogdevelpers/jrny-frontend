@@ -1,11 +1,10 @@
-import { useState } from "react";
-import Contact from "../components/Contact/Contact";
-// import PartnerShow from "../components/PartnerShow/PartnerShow";
+import { useEffect, useState } from "react";
 import "./../css/portfolio.css";
-import FooterLine from "../components/shared/footer/FooterLine";
 import Footer from "../components/shared/footer/Footer";
 import { Link } from "react-router";
 import PartnerSlider from "../components/PartnerSlider/PartnerSlider";
+import { fetchCollection } from "../api/strapi";
+import { extractContentByKey } from "../utils/common.util";
 
 
 export default function Portfolio() {
@@ -19,58 +18,79 @@ export default function Portfolio() {
   );
 }
 
-export const PortfolioContent = ()=>{
+export const PortfolioContent = () => {
+
+  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState([]);
+  const [brandLogos, setBrandLogos] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetchCollection('contents'),
+      fetchCollection('portfolios'),
+      fetchCollection('brand-logos'),
+    ])
+      .then(([contentData, portfolioData, brandLogoData]) => {
+        setContent(contentData.data);
+        setPortfolio(portfolioData.data);
+        setBrandLogos(brandLogoData.data);
+      })
+      .catch(err => {
+        console.error('Error fetching data:', err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const ourText = extractContentByKey(content, 'our-portfolio'),
+    portfolioText = extractContentByKey(content, 'portfolio');
+
+    if (loading) return <p>Loading...</p>;
+
   return (
     <>
-    <div className="portfolio-landing-container">
+      <div className="portfolio-landing-container">
 
-<div className="portfolio-top-section">
-  <div className="portfolio-our-projects">
-    <div className="our-projects-heading">
-      <span className="our-projects-span">
-        Our <span className="jrny-span-text">Portfolio</span>
-      </span>
-    </div>
-    <p className="our-projects-p">
-      We create immersive and impactful digital experiences, from
-      virtual conferences to interactive brand activations. Our work
-      transforms ideas into unforgettable moments that engage and
-      inspire audiences. Explore our portfolio to see the journeys
-      we’ve crafted.
-    </p>
-  </div>
-  <div className="portfolio-partner-show">
-              <PartnerSlider />
+        <div className="portfolio-top-section">
+          <div className="portfolio-our-projects">
+            <div className="our-projects-heading">
+              <span className="our-projects-span">
+                {ourText?.contentTitle} <span className="jrny-span-text">{portfolioText?.contentTitle}</span>
+              </span>
             </div>
-  {/* <div className="portfolio-partner-show">
-    <PartnerShow />
-  </div> */}
-</div>
-<PortfolioMiddleList />
-</div>
+            <p className="our-projects-p">
+              {ourText?.text}
+            </p>
+          </div>
+          <div className="portfolio-partner-show">
+            <PartnerSlider brandLogos={brandLogos} />
+          </div>
+        </div>
+        <PortfolioMiddleList portfolio={portfolio}/>
+      </div>
 
- 
-<Footer/>
+      <Footer />
     </>
   )
 }
 
-interface PortfolioTileProps{
-  videoLink:string,
-  thumbnail?:string,
+interface PortfolioTileProps {
+  key: number,
+  videoLink: string,
+  thumbnail?: string,
   tileTitle: string
 }
 
-const PortfolioTile = ({videoLink, thumbnail, tileTitle}:PortfolioTileProps) =>{
-  if(!thumbnail){
-
+const PortfolioTile = ({key, videoLink, thumbnail, tileTitle }: PortfolioTileProps) => {
+  if (!thumbnail) {
   }
 
   return (
     <div className="portfolio-tile-box moveUp">
       <div className="tile-thumbnail">
-        <Link to={'/portfolio/:abcd'} className='portfolio-link'>
-        <img src={thumbnail ?? '/landing-video-card.png'} alt="" />
+        <Link to={`/portfolio/${key}`} className='portfolio-link'>
+          {/* <img src={thumbnail ?? '/landing-video-card.png'} alt="" /> */}
+          <img src={'/landing-video-card.png'} alt="" />
         </Link>
       </div>
       <div className="tile-title">
@@ -81,35 +101,27 @@ const PortfolioTile = ({videoLink, thumbnail, tileTitle}:PortfolioTileProps) =>{
 }
 
 
-export const PortfolioMiddleList = () => {
-  const allTiles = [...Array(20)].map((_, i) => ({
-    id: i,
-    title: `Project ${i + 1}`,
-    videoLink: "http",
-    thumbnail: "/portfolio-video-card.png",
-  }));
+export const PortfolioMiddleList = ({ portfolio }: any) => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [visibleCount, setVisibleCount] = useState(6); // Show 6 tiles initially
 
- 
+  console.log('portfolio', portfolio)
 
   return (
     <div className="portfolio-middle-list">
       <div className="portfolio-tile-container">
-        {allTiles.slice(0, visibleCount).map((tile) => (
-          <div key={tile.id} className="portfolio-tile">
+        {portfolio?.slice(0, visibleCount)?.map((element: any) => (
+          <div key={element.id} className="portfolio-tile">
             <PortfolioTile
-              key={tile.id}
-              tileTitle={tile.title}
-              videoLink={tile.videoLink}
-              thumbnail={tile.thumbnail}
+              key={element.id}
+              tileTitle={element.portfolioTitle}
+              videoLink={element.portfolioVideo}
+              thumbnail={element.portfolioImage}
             />
           </div>
         ))}
       </div>
-
- 
     </div>
   );
 };

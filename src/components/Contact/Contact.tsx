@@ -104,11 +104,12 @@ export const SocialDivs = ()=>{
     <div className={  `${isMobile?"social-divs-mobile":"social-divs"}`  }>
     <div className="social-div-container">
       <div className="social-heading">Email</div>
-      <div className="social-example">kiminonawa@example.com</div>
+      <div className="social-example">info@zerodesignstudios.com</div>
     </div>
     <div className="social-div-container">
       <div className="social-heading">Phone</div>
-      <div className="social-example">kiminonawa@example.com</div>
+      <div className="social-example">9977098856</div>
+      <div className="social-example">8837636101</div>
     </div>
     <div className="social-div-container">
       <div className="social-heading">Location</div>
@@ -119,8 +120,8 @@ export const SocialDivs = ()=>{
     </div>
     <div className="social-div-container">
       <div className="social-heading">Services</div>
-      <div className="social-example">Content creation</div>
-      <div className="social-example">Experience design</div>
+      <div className="social-example">Content Creation</div>
+      <div className="social-example">Experience Design</div>
       <div className="social-example">Experimental Marketing</div>
       <div className="social-example">Multimedia Production</div>
     </div>

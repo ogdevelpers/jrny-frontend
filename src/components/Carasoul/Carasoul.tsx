@@ -51,7 +51,7 @@ const cards = [
   },
 ];
 
-export default function Carasoul() {
+export default function Carasoul({testimonial}: any) {
     const [active,setActive] = useState(false);
     const carSliderRef = useRef<HTMLDivElement>(null);
     const carTagRef = useRef<HTMLDivElement>(null);
@@ -141,26 +141,26 @@ export default function Carasoul() {
           <div className="carousel-slider" ref={carSliderRef} id="yourID">
             <div className="carousel-container" ref={carTagRef}>
               {
-              cards.map((card,index:number)=>(
-                <Card key={index} profileName={card.profileName} profileDesignation={card.profileDesignation}
-                      compliment={card.compliment} active={active} />
+              testimonial?.map((card: any,index:number)=>(
+                <Card key={index} profileName={card.name} profileDesignation={card.jobTitle}
+                      compliment={card.message} active={active} />
 
               ))
               }
             </div>
             <div className="carousel-container" >
               {
-              cards.map((card,index:number)=>(
-                <Card key={index} profileName={card.profileName} profileDesignation={card.profileDesignation}
-                      compliment={card.compliment} active={active} />
+              testimonial?.map((card: any,index:number)=>(
+                <Card key={index} profileName={card.name} profileDesignation={card.jobTitle}
+                      compliment={card.message} active={active} />
               ))
               }
             </div>
             <div className="carousel-container" >
               {
-              cards.map((card,index:number)=>(
-                <Card key={index} profileName={card.profileName} profileDesignation={card.profileDesignation}
-                      compliment={card.compliment} active={active} />
+              testimonial?.map((card: any,index:number)=>(
+                <Card key={index} profileName={card.name} profileDesignation={card.jobTitle}
+                      compliment={card.message} active={active} />
               ))
               }
             </div>

@@ -5,12 +5,10 @@ import { useRef    } from 'react';
 import Tags from '../Tags/Tags';
 import './tagSlider.css';
 
-const TagSlider = () => {
+const TagSlider = ({tag}: any) => {
   const tagSliderRef = useRef<HTMLDivElement>(null);
   const tagContainerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-
- 
 
   useGSAP(() => {
     const slider = tagSliderRef.current;
@@ -42,35 +40,35 @@ const TagSlider = () => {
     dependencies: [] // Only run once on mount
   });
 
-  const tagsArray = [
-    "Virtual Networking",
-    "Digital Tracking and Registration",
-    "Live Streaming",
-    "Event Branding and Digital Identity", 
-    "Event Analytics",
-    "Post-event Content",
-    "Planning and Execution"
-  ];
+  // const tagsArray = [
+  //   "Virtual Networking",
+  //   "Digital Tracking and Registration",
+  //   "Live Streaming",
+  //   "Event Branding and Digital Identity", 
+  //   "Event Analytics",
+  //   "Post-event Content",
+  //   "Planning and Execution"
+  // ];
 
   return (
     <div className="tag-slider-wrapper" ref={wrapperRef}>
       <div className="tag-slider" ref={tagSliderRef}>
         {/* First set of tags - this is what we'll measure */}
         <div className="tag-container" ref={tagContainerRef}>
-          {tagsArray.map((tag, index) => (
-            <Tags tagTitle={tag} key={`tag-${index}`} />
+          {tag?.map((tag: any, index: number) => (
+            <Tags tagTitle={tag.tagTitle} key={index} />
           ))}
         </div>
         
         {/* Duplicate sets for seamless looping */}
         <div className="tag-container">
-          {tagsArray.map((tag, index) => (
-            <Tags tagTitle={tag} key={`tag-dup-1-${index}`} />
+          {tag?.map((tag: any, index: number) => (
+            <Tags tagTitle={tag.tagTitle} key={`tag-dup-1-${index}`} />
           ))}
         </div>
         <div className="tag-container">
-          {tagsArray.map((tag, index) => (
-            <Tags tagTitle={tag} key={`tag-dup-1-${index}`} />
+          {tag?.map((tag: any, index: number) => (
+            <Tags tagTitle={tag.tagTitle} key={`tag-dup-1-${index}`} />
           ))}
         </div>
       </div>

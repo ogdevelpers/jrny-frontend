@@ -3,30 +3,11 @@ import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import './PartnerSlider.css';
 
- 
+type PartnerSliderProps = {
+  brandLogos: any[]; 
+};
 
-const sliderImages = [
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png',
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png',
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png',
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png',
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png',
-  '/assets/slider1.png',
-  '/assets/slider2.png',
-  '/assets/slider3.png'
-];
-
-const PartnerSlider: React.FC = () => {
+const PartnerSlider: React.FC<PartnerSliderProps> = ({brandLogos}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
@@ -113,12 +94,12 @@ const PartnerSlider: React.FC = () => {
         <div className="partner-images" ref={sliderRef}>
           {/* First set of images */}
           <div className="first-partner">
-            {sliderImages.map((image, index) => (
-              <div className="partner-image" key={`first-${index}`}>
+            {brandLogos?.map((element: any) => (
+              <div className="partner-image" key={element.key}>
                 <img
                   className="partner-image-img"
-                  src={image}
-                  alt={`Partner ${index + 1}`}
+                  src={element.brandLogoLink}
+                  alt={element.brandName}
                   loading="lazy"
                   width="100"
                   height="50"
@@ -127,11 +108,11 @@ const PartnerSlider: React.FC = () => {
             ))} 
           </div>
           <div className="second-partner">
-            {sliderImages.map((image, index) => (
-              <div className="partner-image" key={`second-${index}`} aria-hidden="true">
+            {brandLogos?.map((element: any) => (
+              <div className="partner-image" key={brandLogos.key} aria-hidden="true">
                 <img
                   className="partner-image-img"
-                  src={image}
+                  src={element.brandLogoLink}
                   alt="" // Alt text for aria-hidden elements can be empty
                   loading="lazy"
                   width="100"
