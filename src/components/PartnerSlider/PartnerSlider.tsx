@@ -109,7 +109,7 @@ const PartnerSlider: React.FC<PartnerSliderProps> = ({brandLogos}) => {
           </div>
           <div className="second-partner">
             {brandLogos?.map((element: any) => (
-              <div className="partner-image" key={brandLogos.key} aria-hidden="true">
+              <div className="partner-image" key={element.key} aria-hidden="true">
                 <img
                   className="partner-image-img"
                   src={element.brandLogoLink}
