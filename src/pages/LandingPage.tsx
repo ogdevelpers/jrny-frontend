@@ -5,7 +5,7 @@ import AnimatedPathWithSlab from "../components/LineSvg/LineSvg";
 import { PortfolioMiddleList } from "./Portfolio";
 import PartnerSlider from "../components/PartnerSlider/PartnerSlider";
 import useIsMobile from "../hooks/useIsMobile";
-// import LineSvgMobile from "../components/LineSvg/LineSvgMobile";
+import LineSvgMobile from "../components/LineSvg/LineSvgMobile";
 import Footer from "../components/shared/footer/Footer";
 import ExpandingVideo from "../components/ExpandingVideo/ExpandingVideo";  
 import { useEffect, useState } from "react";
@@ -93,7 +93,7 @@ export default function LandingPage() {
             {isMobile ? (
               <section className="svg-content-mobile"> 
               <div className="content-svg-mobile">
-                {/* <LineSvgMobile/> */}
+                <LineSvgMobile/>
               </div>
                </section>
             ) : (

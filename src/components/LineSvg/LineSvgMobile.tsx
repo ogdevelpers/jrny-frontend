@@ -13,14 +13,6 @@ const LineSvgMobile: React.FC = () => {
   const movingGroupRef = useRef<SVGGElement>(null);
   const [rightEdge, setRightEdge] = React.useState(window.innerWidth);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setRightEdge(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useGSAP(() => {
     if (!pathRef.current || !movingGroupRef.current || !svgRef.current) return;
@@ -51,10 +43,12 @@ const LineSvgMobile: React.FC = () => {
         trigger: svg,
         start: "top bottom",
         end: "bottom 40%", 
-        scrub: true,
+        scrub: true, 
         markers: true, // Remove in production
       }
     });
+
+    ScrollTrigger.normalizeScroll(true);
 
     tl.fromTo(moving, 
       { 
@@ -75,17 +69,10 @@ const LineSvgMobile: React.FC = () => {
         duration: 1
       }
     );
-
-    // Handle window resize to recalculate distances
-    const handleResize = () => {
-      ScrollTrigger.refresh();
-    };
-
-    window.addEventListener('resize', handleResize);
+ 
 
     return () => {
-      ScrollTrigger.getAll().forEach(st => st.kill());
-      window.removeEventListener('resize', handleResize);
+      ScrollTrigger.getAll().forEach(st => st.kill()); 
     };
   }, { scope: svgRef });
 
